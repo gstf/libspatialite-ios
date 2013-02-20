@@ -1,0 +1,24 @@
+diff -rupN spatialite/src/gaiaaux/gg_utf8.c spatialite-ios/src/gaiaaux/gg_utf8.c
+--- spatialite/src/gaiaaux/gg_utf8.c	2012-11-25 12:47:00.000000000 +0100
++++ spatialite-ios/src/gaiaaux/gg_utf8.c	2013-02-20 16:58:56.000000000 +0100
+@@ -71,7 +71,7 @@ extern const char *locale_charset (void)
+ #else /* not MINGW32 - WIN32 */
+ #if defined(__APPLE__) || defined(__ANDROID__)
+ #include <iconv.h>
+-#include <localcharset.h>
++//#include <localcharset.h>
+ #else /* neither Mac OsX nor Android */
+ #include <iconv.h>
+ #include <langinfo.h>
+diff -rupN spatialite/src/gaiageo/gg_shape.c spatialite-ios/src/gaiageo/gg_shape.c
+--- spatialite/src/gaiageo/gg_shape.c	2012-11-25 12:47:00.000000000 +0100
++++ spatialite-ios/src/gaiageo/gg_shape.c	2013-02-20 16:59:01.000000000 +0100
+@@ -73,7 +73,7 @@ extern const char *locale_charset (void)
+ #else /* not MINGW32 */
+ #if defined(__APPLE__) || defined(__ANDROID__)
+ #include <iconv.h>
+-#include <localcharset.h>
++//#include <localcharset.h>
+ #else /* neither Mac OsX nor Android */
+ #include <iconv.h>
+ #include <langinfo.h>
