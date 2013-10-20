@@ -83,10 +83,10 @@ ${LIBDIR}/libgeos.a: ${CURDIR}/geos
 	LDFLAGS="${LDFLAGS}" ./configure --host=arm-apple-darwin --prefix=${PREFIX} --disable-shared && make clean install
 
 ${CURDIR}/geos:
-	curl http://download.osgeo.org/geos/geos-3.3.7.tar.bz2 > geos.tar.bz2
+	curl http://download.osgeo.org/geos/geos-3.4.2.tar.bz2 > geos.tar.bz2
 	tar -xzf geos.tar.bz2
 	rm geos.tar.bz2
-	mv geos-3.3.7 geos
+	mv geos-3.4.2 geos
 
 ${LIBDIR}/libsqlite3.a: ${CURDIR}/sqlite3
 	cd sqlite3 && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
@@ -98,10 +98,10 @@ ${LIBDIR}/libsqlite3.a: ${CURDIR}/sqlite3
 	./configure --host=arm-apple-darwin --prefix=${PREFIX} --disable-shared --enable-static && make clean install
 
 ${CURDIR}/sqlite3:
-	curl http://www.sqlite.org/sqlite-autoconf-3071502.tar.gz > sqlite3.tar.gz
+	curl http://sqlite.org/2013/sqlite-autoconf-3080100.tar.gz > sqlite3.tar.gz
 	tar xzvf sqlite3.tar.gz
 	rm sqlite3.tar.gz
-	mv sqlite-autoconf-3071502 sqlite3
+	mv sqlite-autoconf-3080100 sqlite3
 	touch sqlite3
 
 clean:
