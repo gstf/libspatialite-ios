@@ -1,6 +1,3 @@
-
-LIBRARY = libspatialite.a
-
 XCODE_DEVELOPER = $(shell xcode-select --print-path)
 IOS_PLATFORM ?= iPhoneOS
 
@@ -42,9 +39,9 @@ INCLUDEDIR = ${PREFIX}/include
 
 CXX = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 CC = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR}
-CXXFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR}
-LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH}
+CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=5.0
+CXXFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=5.0
+LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=5.0
 
 arch: ${LIBDIR}/libspatialite.a
 
@@ -57,12 +54,11 @@ ${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/lib
 	LDFLAGS="${LDFLAGS}  -liconv -lgeos -lgeos_c -lc++" ./configure --host=arm-apple-darwin --disable-freexl  --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install
 
 ${CURDIR}/spatialite:
-	curl http://www.gaia-gis.it/gaia-sins/libspatialite-4.0.0.tar.gz > spatialite.tar.gz
+	curl http://www.gaia-gis.it/gaia-sins/libspatialite-4.1.1.tar.gz > spatialite.tar.gz
 	tar -xzf spatialite.tar.gz
 	rm spatialite.tar.gz
-	mv libspatialite-4.0.0 spatialite
+	mv libspatialite-4.1.1 spatialite
 	patch -Np0 < spatialite.patch
-
 
 ${LIBDIR}/libproj.a: ${CURDIR}/proj
 	cd proj && env \
