@@ -28,9 +28,9 @@ lib/libspatialite.a: build_arches
 
 # Build separate architectures
 build_arches:
-	${MAKE} arch ARCH=armv7 IOS_PLATFORM=iPhoneOS
-	${MAKE} arch ARCH=armv7s IOS_PLATFORM=iPhoneOS
-	${MAKE} arch ARCH=i386 IOS_PLATFORM=iPhoneSimulator
+	${MAKE} arch ARCH=armv7 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin
+	${MAKE} arch ARCH=armv7s IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin
+	${MAKE} arch ARCH=i386 IOS_PLATFORM=iPhoneSimulator HOST=i386-apple-darwin
 
 PREFIX = ${CURDIR}/build/${ARCH}
 LIBDIR = ${PREFIX}/lib
@@ -40,7 +40,7 @@ INCLUDEDIR = ${PREFIX}/include
 CXX = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 CC = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
 CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=5.0
-CXXFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=5.0
+CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=5.0
 LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=5.0
 
 arch: ${LIBDIR}/libspatialite.a
@@ -51,7 +51,7 @@ ${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/lib
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS}  -liconv -lgeos -lgeos_c -lc++" ./configure --host=arm-apple-darwin --disable-freexl  --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install
+	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" ./configure --host=${HOST} --disable-freexl --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
 ${CURDIR}/spatialite:
 	curl http://www.gaia-gis.it/gaia-sins/libspatialite-4.1.1.tar.gz > spatialite.tar.gz
@@ -66,7 +66,7 @@ ${LIBDIR}/libproj.a: ${CURDIR}/proj
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="-${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS}" ./configure --host=arm-apple-darwin --prefix=${PREFIX} --disable-shared && make clean install
+	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
 
 ${CURDIR}/proj:
 	curl http://download.osgeo.org/proj/proj-4.8.0.tar.gz > proj.tar.gz
@@ -80,7 +80,7 @@ ${LIBDIR}/libgeos.a: ${CURDIR}/geos
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="-${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS}" ./configure --host=arm-apple-darwin --prefix=${PREFIX} --disable-shared && make clean install
+	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
 
 ${CURDIR}/geos:
 	curl http://download.osgeo.org/geos/geos-3.4.2.tar.bz2 > geos.tar.bz2
@@ -95,7 +95,7 @@ ${LIBDIR}/libsqlite3.a: ${CURDIR}/sqlite3
 	CFLAGS="${CFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
 	CXXFLAGS="${CXXFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
 	LDFLAGS="-Wl,-arch -Wl,${ARCH} -arch_only ${ARCH} ${LDFLAGS}" \
-	./configure --host=arm-apple-darwin --prefix=${PREFIX} --disable-shared --enable-static && make clean install
+	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared --enable-static && make clean install
 
 ${CURDIR}/sqlite3:
 	curl http://sqlite.org/2013/sqlite-autoconf-3080100.tar.gz > sqlite3.tar.gz
@@ -105,4 +105,4 @@ ${CURDIR}/sqlite3:
 	touch sqlite3
 
 clean:
-	rm -rf build geos proj spatialite include lib
+	rm -rf build geos proj spatialite sqlite3 include lib
