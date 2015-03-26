@@ -67,7 +67,7 @@ ${LIBDIR}/libproj.a: ${CURDIR}/proj
 	CXX=${CXX} \
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
-	CXXFLAGS="-${CXXFLAGS}" \
+	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
 
 ${CURDIR}/proj:
@@ -81,7 +81,7 @@ ${LIBDIR}/libgeos.a: ${CURDIR}/geos
 	CXX=${CXX} \
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
-	CXXFLAGS="-${CXXFLAGS}" \
+	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
 
 ${CURDIR}/geos:
