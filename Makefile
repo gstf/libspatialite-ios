@@ -41,8 +41,8 @@ INCLUDEDIR = ${PREFIX}/include
 
 CXX = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 CC = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0 -Wno-error=implicit-function-declaration
-CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0 -Wno-error=implicit-function-declaration
+CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0
+CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0
 LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=7.0
 
 arch: ${LIBDIR}/libspatialite.a
@@ -51,8 +51,8 @@ ${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/lib
 	cd spatialite && env \
 	CXX=${CXX} \
 	CC=${CC} \
-	CFLAGS="${CFLAGS}" \
-	CXXFLAGS="${CXXFLAGS}" \
+	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
+	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" ./configure --host=${HOST} --disable-freexl --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
 ${CURDIR}/spatialite:
