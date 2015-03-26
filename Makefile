@@ -21,7 +21,7 @@ lib/libspatialite.a: build_arches
 		${IOS_PLATFORM_DEVELOPER}/usr/bin/lipo -create \
 			-arch armv7 build/armv7/lib/$$name.a \
 			-arch armv7s build/armv7s/lib/$$name.a \
-                        -arch arm64 build/arm64/lib/$$name.a \
+			-arch arm64 build/arm64/lib/$$name.a \
 			-arch i386 build/i386/lib/$$name.a \
 			-output lib/$$name.a \
 		; \
