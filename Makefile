@@ -23,6 +23,7 @@ lib/libspatialite.a: build_arches
 			-arch armv7s build/armv7s/lib/$$name.a \
 			-arch arm64 build/arm64/lib/$$name.a \
 			-arch i386 build/i386/lib/$$name.a \
+			-arch x86_64 build/x86_64/lib/$$name.a \
 			-output lib/$$name.a \
 		; \
 		done;
@@ -33,6 +34,7 @@ build_arches:
 	${MAKE} arch ARCH=armv7s IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin
 	${MAKE} arch ARCH=arm64 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin
 	${MAKE} arch ARCH=i386 IOS_PLATFORM=iPhoneSimulator HOST=i386-apple-darwin
+	${MAKE} arch ARCH=x86_64 IOS_PLATFORM=iPhoneSimulator HOST=x86_64-apple-darwin
 
 PREFIX = ${CURDIR}/build/${ARCH}
 LIBDIR = ${PREFIX}/lib
