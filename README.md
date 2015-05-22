@@ -9,6 +9,7 @@ The resulting library is a "fat" library suitable for multiple architectures. Th
 - armv7s (iOS)
 - arm64 (iOS)
 - i386 (iOS Simulator)
+- x86_64 (iOS Simulator)
 
 Requirements
 ------------
