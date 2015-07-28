@@ -102,10 +102,10 @@ ${LIBDIR}/libsqlite3.a: ${CURDIR}/sqlite3
 	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared --enable-static && make clean install
 
 ${CURDIR}/sqlite3:
-	curl http://sqlite.org/2013/sqlite-autoconf-3080100.tar.gz > sqlite3.tar.gz
+	curl http://sqlite.org/2015/sqlite-autoconf-3081100.tar.gz > sqlite3.tar.gz
 	tar xzvf sqlite3.tar.gz
 	rm sqlite3.tar.gz
-	mv sqlite-autoconf-3080100 sqlite3
+	mv sqlite-autoconf-3081100 sqlite3
 	touch sqlite3
 
 clean:
