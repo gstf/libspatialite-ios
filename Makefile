@@ -73,10 +73,10 @@ ${LIBDIR}/libproj.a: ${CURDIR}/proj
 	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
 
 ${CURDIR}/proj:
-	curl http://download.osgeo.org/proj/proj-4.8.0.tar.gz > proj.tar.gz
+	curl -L https://github.com/OSGeo/proj.4/archive/4.8.0.tar.gz > proj.tar.gz
 	tar -xzf proj.tar.gz
 	rm proj.tar.gz
-	mv proj-4.8.0 proj
+	mv proj.4-4.8.0 proj
 
 ${LIBDIR}/libgeos.a: ${CURDIR}/geos
 	cd geos && env \
