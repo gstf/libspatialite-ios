@@ -18,7 +18,7 @@ lib/libspatialite.a: build_arches
 	# Make fat libraries for all architectures
 	for file in build/armv7/lib/*.a; \
 		do name=`basename $$file .a`; \
-		${IOS_PLATFORM_DEVELOPER}/usr/bin/lipo -create \
+		lipo -create \
 			-arch armv7 build/armv7/lib/$$name.a \
 			-arch armv7s build/armv7s/lib/$$name.a \
 			-arch arm64 build/arm64/lib/$$name.a \
