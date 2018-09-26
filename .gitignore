@@ -15,3 +15,11 @@
 *.exe
 *.out
 *.app
+
+# Downloaded and built directories
+build
+include
+geos
+proj
+spatialite
+sqlite3
