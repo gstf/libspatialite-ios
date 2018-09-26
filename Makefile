@@ -99,7 +99,7 @@ ${LIBDIR}/libsqlite3.a: ${CURDIR}/sqlite3
 	CFLAGS="${CFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
 	CXXFLAGS="${CXXFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
 	LDFLAGS="-Wl,-arch -Wl,${ARCH} -arch_only ${ARCH} ${LDFLAGS}" \
-	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared --enable-static && make clean install
+	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared --enable-static && make clean sqlite3.c
 
 ${CURDIR}/sqlite3:
 	curl http://www.sqlite.org/2017/sqlite-autoconf-3170000.tar.gz > sqlite3.tar.gz
