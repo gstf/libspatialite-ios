@@ -16,7 +16,7 @@ lib/libspatialite.a: build_arches
 	cp -R build/armv7/include/*.h include
 
 	# Make fat libraries for all architectures
-	for file in build/armv7/lib/*.a; \
+	for file in build/arm64/lib/*.a; \
 		do name=`basename $$file .a`; \
 		lipo -create \
 			-arch armv7 build/armv7/lib/$$name.a \
@@ -43,13 +43,13 @@ INCLUDEDIR = ${PREFIX}/include
 
 CXX = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 CC = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0 -O3
-CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0 -O3
+CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0 -O3 -fembed-bitcode
+CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0 -O3 -fembed-bitcode
 LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=7.0
 
 arch: ${LIBDIR}/libspatialite.a
 
-${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/libsqlite3.a ${CURDIR}/spatialite
+${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${CURDIR}/spatialite
 	cd spatialite && env \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -63,6 +63,7 @@ ${CURDIR}/spatialite:
 	rm spatialite.tar.gz
 	mv libspatialite-4.3.0a spatialite
 	patch -Np0 < spatialite.patch
+	./change-deployment-target spatialite
 
 ${LIBDIR}/libproj.a: ${CURDIR}/proj
 	cd proj && env \
@@ -77,6 +78,7 @@ ${CURDIR}/proj:
 	tar -xzf proj.tar.gz
 	rm proj.tar.gz
 	mv proj-4.9.3 proj
+	./change-deployment-target proj
 
 ${LIBDIR}/libgeos.a: ${CURDIR}/geos
 	cd geos && env \
@@ -91,6 +93,7 @@ ${CURDIR}/geos:
 	tar -xzf geos.tar.bz2
 	rm geos.tar.bz2
 	mv geos-3.6.1 geos
+	./change-deployment-target geos
 
 ${LIBDIR}/libsqlite3.a: ${CURDIR}/sqlite3
 	cd sqlite3 && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
@@ -106,6 +109,7 @@ ${CURDIR}/sqlite3:
 	tar xzvf sqlite3.tar.gz
 	rm sqlite3.tar.gz
 	mv sqlite-autoconf-3170000 sqlite3
+	./change-deployment-target sqlite3
 	touch sqlite3
 
 clean:

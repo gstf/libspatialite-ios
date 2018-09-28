@@ -1,0 +1,6 @@
+#!/bin/bash
+
+repl='s/\(MACOSX_DEPLOYMENT_TARGET\)-10.0/\1-10.10/g'
+sed -i $repl "$1/ltmain.sh"
+sed -i $repl "$1/configure"
+
