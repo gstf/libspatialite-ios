@@ -1,0 +1,11 @@
+--- spatialite/src/Headers/spatialite/gg_formats.h	2016-04-06 21:47:50.000000000 +0100
++++ ./gg_formats.h	2016-04-07 19:16:24.000000000 +0100
+@@ -60,6 +60,8 @@
+ {
+ #endif
+ 
++#include <sqlite3.h>
++
+ /* function prototypes */
+ 
+ /**

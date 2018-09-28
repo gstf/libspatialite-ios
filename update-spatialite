@@ -1,0 +1,11 @@
+#!/bin/bash
+
+patch -Np0 < patches/spatialite.patch
+patch -Np0 < patches/gg_dxf.h.patch
+patch -Np0 < patches/gg_formats.h.patch
+patch -Np0 < patches/gg_structs.h.patch
+patch -Np0 < patches/sqlite.h.patch
+
+for f in $(find spatialite -name Makefile.*); do
+  sed -i 's/ \-DLOADABLE_EXTENSION//g' $f
+done

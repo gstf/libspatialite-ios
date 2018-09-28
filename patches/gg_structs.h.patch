@@ -1,0 +1,11 @@
+--- spatialite/src/Headers/spatialite/gg_structs.h	2016-04-07 21:08:45.000000000 +0100
++++ ./gg_structs.h	2016-04-07 21:10:26.000000000 +0100
+@@ -62,6 +62,8 @@
+ {
+ #endif
+ 
++#include <sqlite3.h>
++
+ /**
+  Container for OGC POINT Geometry
+  */
