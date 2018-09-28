@@ -1,0 +1,26 @@
+--- spatialite/src/Headers/spatialite/sqlite.h	2016-04-09 11:13:12.000000000 +0100
++++ ./sqlite.h	2016-04-09 11:16:30.000000000 +0100
+@@ -46,21 +46,9 @@
+ #ifndef _SPATIALITE_SQLITE_H
+ #define _SPATIALITE_SQLITE_H
+ 
+-#ifdef LOADABLE_EXTENSION	/* loadable-extension only */
+-#ifdef SPL_AMALGAMATION		/* spatialite-amalgamation */
+-#include <spatialite/sqlite3ext.h>
+-#else
+-#include <sqlite3ext.h>
+-#endif
+-/* We can't use SQLITE_EXTENSION_INIT1 as this is an intializer in recent version of sqlite */
+-extern const sqlite3_api_routines *sqlite3_api;
+-#else /* ordinary lib */
+-#ifdef SPL_AMALGAMATION		/* spatialite-amalgamation */
+-#include <spatialite/sqlite3.h>
+-#else
++
+ #include <sqlite3.h>
+-#endif
+-#endif
++
+ 
+ #ifndef SQLITE_DETERMINISTIC
+ /* probably SQLite < 3.8.3 - attempting to fix */

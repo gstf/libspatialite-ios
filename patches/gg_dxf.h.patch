@@ -1,0 +1,11 @@
+--- spatialite/src/Headers/spatialite/gg_dxf.h	2016-04-06 21:47:50.000000000 +0100
++++ ./gg_dxf.h	2016-04-07 19:16:26.000000000 +0100
+@@ -59,6 +59,8 @@
+ {
+ #endif
+ 
++#include <sqlite3.h>
++
+ /* constant values for DXF */
+ 
+ /** import distinct layers */
