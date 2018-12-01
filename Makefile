@@ -77,7 +77,8 @@ ${LIBDIR}/rttopo.a: ${CURDIR}/rttopo
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" ./configure --host=${HOST} --prefix=${PREFIX} \
+	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
+	./configure --host=${HOST} --prefix=${PREFIX} \
 	    --disable-shared --with-geosconfig=${BINDIR}/geos-config && make clean install
 
 
