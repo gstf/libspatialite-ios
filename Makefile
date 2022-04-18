@@ -5,15 +5,15 @@ IOS_PLATFORM ?= iPhoneOS
 IOS_PLATFORM_DEVELOPER = ${XCODE_DEVELOPER}/Platforms/${IOS_PLATFORM}.platform/Developer
 IOS_SDK = ${IOS_PLATFORM_DEVELOPER}/SDKs/$(shell ls ${IOS_PLATFORM_DEVELOPER}/SDKs | sort -r | head -n1)
 
-all: lib/libspatialite.a
-lib/libspatialite.a: build_arches
-	mkdir -p lib
-	mkdir -p include
+all: build/lib/libspatialite.a
+build/lib/libspatialite.a: build_arches
+	mkdir -p build/lib
+	mkdir -p build/include
 
 	# Copy includes
-	cp -R build/arm64/include/geos include
-	cp -R build/arm64/include/spatialite include
-	cp -R build/arm64/include/*.h include
+	cp -R build/arm64/include/geos build/include
+	cp -R build/arm64/include/spatialite build/include
+	cp -R build/arm64/include/*.h build/include
 
 	# Make fat libraries for all architectures
 	for file in build/arm64/lib/*.a; \
@@ -21,7 +21,7 @@ lib/libspatialite.a: build_arches
 		lipo -create \
 			-arch arm64 build/arm64/lib/$$name.a \
 			-arch x86_64 build/x86_64/lib/$$name.a \
-			-output lib/$$name.a \
+			-output build/lib/$$name.a \
 		; \
 		done;
 
@@ -96,29 +96,28 @@ ${LIBDIR}/libsqlite3.a: ${SRCDIR}/sqlite3
 ${SRCDIR}/proj:
 	mkdir -p $@
 	curl -L http://download.osgeo.org/proj/proj-4.9.3.tar.gz | tar -xz -C $@ --strip-components=1
-# ./change-deployment-target proj
+	./change-deployment-target $@
 
 ${SRCDIR}/geos:
 	mkdir -p $@
 	curl http://download.osgeo.org/geos/geos-3.10.2.tar.bz2 | tar -xz -C $@ --strip-components=1
-# ./change-deployment-target geos
+	./change-deployment-target $@
 
 ${SRCDIR}/spatialite:
 	mkdir -p $@
 	curl http://www.gaia-gis.it/gaia-sins/libspatialite-5.0.1.tar.gz | tar -xz -C $@ --strip-components=1
+	./change-deployment-target $@
 #	./update-spatialite
-#	./change-deployment-target spatialite
 
 ${SRCDIR}/rttopo:
 	git clone https://git.osgeo.org/gogs/rttopo/librttopo.git $@
 	cd $@ && git checkout librttopo-1.1.0 && ./autogen.sh
-# ./change-deployment-target $^
-
+	./change-deployment-target $@
 
 ${SRCDIR}/sqlite3:
 	mkdir -p $@
 	curl https://www.sqlite.org/2022/sqlite-autoconf-3380100.tar.gz | tar -xz -C $@ --strip-components=1
-# ./change-deployment-target $^
+	./change-deployment-target $@
 
 clean:
 	rm -rf build sources
