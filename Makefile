@@ -19,10 +19,7 @@ lib/libspatialite.a: build_arches
 	for file in build/arm64/lib/*.a; \
 		do name=`basename $$file .a`; \
 		lipo -create \
-			-arch armv7 build/armv7/lib/$$name.a \
-			-arch armv7s build/armv7s/lib/$$name.a \
 			-arch arm64 build/arm64/lib/$$name.a \
-			-arch i386 build/i386/lib/$$name.a \
 			-arch x86_64 build/x86_64/lib/$$name.a \
 			-output lib/$$name.a \
 		; \
@@ -30,12 +27,10 @@ lib/libspatialite.a: build_arches
 
 # Build separate architectures
 build_arches:
-	${MAKE} arch ARCH=armv7 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin
-	${MAKE} arch ARCH=armv7s IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin
 	${MAKE} arch ARCH=arm64 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin
-	${MAKE} arch ARCH=i386 IOS_PLATFORM=iPhoneSimulator HOST=i386-apple-darwin
 	${MAKE} arch ARCH=x86_64 IOS_PLATFORM=iPhoneSimulator HOST=x86_64-apple-darwin
 
+SRCDIR = ${CURDIR}/sources
 PREFIX = ${CURDIR}/build/${ARCH}
 LIBDIR = ${PREFIX}/lib
 BINDIR = ${PREFIX}/bin
@@ -49,8 +44,8 @@ LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -
 
 arch: ${LIBDIR}/libspatialite.a
 
-${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/rttopo.a ${CURDIR}/spatialite
-	cd spatialite && env \
+${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/rttopo.a ${SRCDIR}/spatialite
+	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
 	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
@@ -58,21 +53,8 @@ ${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/rtt
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" ./configure --host=${HOST} --enable-freexl=no --enable-rttopo=yes \
 	  --enable-libxml2=no --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
-${CURDIR}/spatialite:
-	curl http://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-5.0.0-beta0.tar.gz > spatialite.tar.gz
-	tar -xzf spatialite.tar.gz
-	rm spatialite.tar.gz
-	mv libspatialite-5.0.0-beta0 spatialite
-	./update-spatialite
-	./change-deployment-target spatialite
-
-${CURDIR}/rttopo:
-	git clone https://git.osgeo.org/gogs/rttopo/librttopo.git rttopo
-	cd rttopo && ./autogen.sh
-	./change-deployment-target rttopo
-
-${LIBDIR}/rttopo.a: ${CURDIR}/rttopo
-	cd rttopo && env \
+${LIBDIR}/rttopo.a: ${SRCDIR}/rttopo
+	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
@@ -82,38 +64,25 @@ ${LIBDIR}/rttopo.a: ${CURDIR}/rttopo
 	    --disable-shared --with-geosconfig=${BINDIR}/geos-config && make clean install
 
 
-${LIBDIR}/libproj.a: ${CURDIR}/proj
-	cd proj && env \
+${LIBDIR}/libproj.a: ${SRCDIR}/proj
+	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
 
-${CURDIR}/proj:
-	curl -L http://download.osgeo.org/proj/proj-4.9.3.tar.gz > proj.tar.gz
-	tar -xzf proj.tar.gz
-	rm proj.tar.gz
-	mv proj-4.9.3 proj
-	./change-deployment-target proj
-
-${LIBDIR}/libgeos.a: ${CURDIR}/geos
-	cd geos && env \
+${LIBDIR}/libgeos.a: ${SRCDIR}/geos
+	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
+	
 
-${CURDIR}/geos:
-	curl http://download.osgeo.org/geos/geos-3.6.1.tar.bz2 > geos.tar.bz2
-	tar -xzf geos.tar.bz2
-	rm geos.tar.bz2
-	mv geos-3.6.1 geos
-	./change-deployment-target geos
-
-${LIBDIR}/libsqlite3.a: ${CURDIR}/sqlite3
-	cd sqlite3 && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
+${LIBDIR}/libsqlite3.a: ${SRCDIR}/sqlite3
+	cd $^ && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
 	CXX=${CXX} \
 	CC=${CC} \
 	CFLAGS="${CFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
@@ -122,13 +91,34 @@ ${LIBDIR}/libsqlite3.a: ${CURDIR}/sqlite3
 	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared \
 	   --enable-dynamic-extensions --enable-static && make clean install-includeHEADERS install-libLTLIBRARIES
 
-${CURDIR}/sqlite3:
-	curl https://www.sqlite.org/2018/sqlite-autoconf-3250200.tar.gz > sqlite3.tar.gz
-	tar xzvf sqlite3.tar.gz
-	rm sqlite3.tar.gz
-	mv sqlite-autoconf-3250200 sqlite3
-	./change-deployment-target sqlite3
-	touch sqlite3
+# SOURCE FILES
+
+${SRCDIR}/proj:
+	mkdir -p $@
+	curl -L http://download.osgeo.org/proj/proj-4.9.3.tar.gz | tar -xz -C $@ --strip-components=1
+# ./change-deployment-target proj
+
+${SRCDIR}/geos:
+	mkdir -p $@
+	curl http://download.osgeo.org/geos/geos-3.10.2.tar.bz2 | tar -xz -C $@ --strip-components=1
+# ./change-deployment-target geos
+
+${SRCDIR}/spatialite:
+	mkdir -p $@
+	curl http://www.gaia-gis.it/gaia-sins/libspatialite-5.0.1.tar.gz | tar -xz -C $@ --strip-components=1
+#	./update-spatialite
+#	./change-deployment-target spatialite
+
+${SRCDIR}/rttopo:
+	git clone https://git.osgeo.org/gogs/rttopo/librttopo.git $@
+	cd $@ && git checkout librttopo-1.1.0 && ./autogen.sh
+# ./change-deployment-target $^
+
+
+${SRCDIR}/sqlite3:
+	mkdir -p $@
+	curl https://www.sqlite.org/2022/sqlite-autoconf-3380100.tar.gz | tar -xz -C $@ --strip-components=1
+# ./change-deployment-target $^
 
 clean:
-	rm -rf build geos proj spatialite include lib rttopo
+	rm -rf build sources
