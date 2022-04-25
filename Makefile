@@ -73,6 +73,9 @@ ${LIBDIR}/libproj.a: ${SRCDIR}/proj
 	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
 
+# We fall back to CMake because we are having trouble setting the sysroot in the configure
+# script. There isn't an apparent way to consume the `--disable-shared` flag in the configure
+# script, so we are ignoring that for now.
 ${LIBDIR}/libgeos.a: ${SRCDIR}/geos
 	cd $^ && env \
 	CXX=${CXX} \
@@ -80,10 +83,8 @@ ${LIBDIR}/libgeos.a: ${SRCDIR}/geos
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS}" \
-	CMAKE_OSX_SYSROOT=${IOS_SDK} \
-	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
-	
-# 	PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin
+	cmake -DCMAKE_OSX_SYSROOT:PATH="${IOS_SDK}" -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" . && \
+	make clean install
 
 ${LIBDIR}/libsqlite3.a: ${SRCDIR}/sqlite3
 	cd $^ && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
