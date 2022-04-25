@@ -50,7 +50,8 @@ ${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/rtt
 	CC=${CC} \
 	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
 	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
-	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" ./configure --host=${HOST} --enable-freexl=no --enable-rttopo=yes \
+	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
+		./configure --host=${HOST} --enable-freexl=no --enable-rttopo=yes \
 	  --enable-libxml2=no --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
 ${LIBDIR}/rttopo.a: ${SRCDIR}/rttopo
@@ -78,8 +79,11 @@ ${LIBDIR}/libgeos.a: ${SRCDIR}/geos
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
+	LDFLAGS="${LDFLAGS}" \
+	CMAKE_OSX_SYSROOT=${IOS_SDK} \
+	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
 	
+# 	PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin
 
 ${LIBDIR}/libsqlite3.a: ${SRCDIR}/sqlite3
 	cd $^ && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
