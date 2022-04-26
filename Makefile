@@ -31,6 +31,7 @@ build_arches:
 	${MAKE} arch ARCH=x86_64 IOS_PLATFORM=iPhoneSimulator HOST=x86_64-apple-darwin
 
 SRCDIR = ${CURDIR}/sources
+WORKDIR = ${CURDIR}/build/${ARCH}/sources
 PREFIX = ${CURDIR}/build/${ARCH}
 LIBDIR = ${PREFIX}/lib
 BINDIR = ${PREFIX}/bin
@@ -43,10 +44,16 @@ CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/inclu
 LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=7.0
 
 arch: ${LIBDIR}/libspatialite.a
+	rm -rf ${WORKDIR}
+
+# Copy files to per-arch workdir so that we don't mess with source files unduly.
+${WORKDIR}/%: ${SRCDIR}/%
+	mkdir -p ${WORKDIR}
+	cp -R $^ $@
 
 # For now, we omit iconv because we can't figure out how to get it to build
 ${LIBDIR}/libspatialite.a: \
-		${SRCDIR}/spatialite ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a \
+		${WORKDIR}/spatialite ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a \
 		${LIBDIR}/librttopo.a ${LIBDIR}/libsqlite3.a \
 		${LIBDIR}/libminizip.a ${LIBDIR}/libiconv.a
 	cd $^ && env \
@@ -58,7 +65,7 @@ ${LIBDIR}/libspatialite.a: \
 		./configure --host=${HOST} --enable-freexl=no --enable-rttopo=yes \
 	  --enable-libxml2=no --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
-${LIBDIR}/librttopo.a: ${SRCDIR}/rttopo
+${LIBDIR}/librttopo.a: ${WORKDIR}/rttopo
 	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -69,7 +76,7 @@ ${LIBDIR}/librttopo.a: ${SRCDIR}/rttopo
 	    --disable-shared --with-geosconfig=${BINDIR}/geos-config && make clean install
 
 
-${LIBDIR}/libproj.a: ${SRCDIR}/proj
+${LIBDIR}/libproj.a: ${WORKDIR}/proj
 	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -80,7 +87,7 @@ ${LIBDIR}/libproj.a: ${SRCDIR}/proj
 # We fall back to CMake because we are having trouble setting the sysroot in the configure
 # script. There isn't an apparent way to consume the `--disable-shared` flag in the configure
 # script, so we are ignoring that for now.
-${LIBDIR}/libgeos.a: ${SRCDIR}/geos
+${LIBDIR}/libgeos.a: ${WORKDIR}/geos
 	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -90,7 +97,7 @@ ${LIBDIR}/libgeos.a: ${SRCDIR}/geos
 	cmake -DCMAKE_OSX_SYSROOT:PATH="${IOS_SDK}" -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" -DBUILD_SHARED_LIBS=OFF . && \
 	make clean install
 
-${LIBDIR}/libsqlite3.a: ${SRCDIR}/sqlite3
+${LIBDIR}/libsqlite3.a: ${WORKDIR}/sqlite3
 	cd $^ && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -100,7 +107,7 @@ ${LIBDIR}/libsqlite3.a: ${SRCDIR}/sqlite3
 	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared \
 	   --enable-dynamic-extensions --enable-static && make clean install-includeHEADERS install-libLTLIBRARIES
 
-${LIBDIR}/libminizip.a: ${SRCDIR}/minizip
+${LIBDIR}/libminizip.a: ${WORKDIR}/minizip
 	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -110,15 +117,15 @@ ${LIBDIR}/libminizip.a: ${SRCDIR}/minizip
 		./configure --host=${HOST} --enable-shared=no \
 		--enable-static=yes --prefix=${PREFIX} && make clean install-strip
 
-${LIBDIR}/libiconv.a: ${SRCDIR}/iconv
-	cd $^ && env \
-	CXX=${CXX} \
-	CC=${CC} \
-	CFLAGS="${CFLAGS}" \
-	CXXFLAGS="${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS}" \
-		./configure --host=${HOST} --enable-shared=no \
-		--enable-static=yes --prefix=${PREFIX} && make clean install-strip
+# ${LIBDIR}/libiconv.a: ${WORKDIR}/iconv
+# 	cd $^ && env \
+# 	CXX=${CXX} \
+# 	CC=${CC} \
+# 	CFLAGS="${CFLAGS}" \
+# 	CXXFLAGS="${CXXFLAGS}" \
+# 	LDFLAGS="${LDFLAGS}" \
+# 		./configure --host=${HOST} --enable-shared=no \
+# 		--enable-static=yes --prefix=${PREFIX} && make clean install-strip
 
 # SOURCE FILES
 
@@ -152,9 +159,9 @@ ${SRCDIR}/minizip:
 	curl http://www.gaia-gis.it/gaia-sins/dataseltzer-sources/minizip-1.2.11.tar.gz | tar -xz -C $@ --strip-components=1
 
 # NOTE: this is disabled for now
-${SRCDIR}/iconv:
-	mkdir -p $@
-	curl http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz | tar -xz -C $@ --strip-components=1
+# ${SRCDIR}/iconv:
+# 	mkdir -p $@
+# 	curl http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz | tar -xz -C $@ --strip-components=1
 
 clean:
 	rm -rf build sources
