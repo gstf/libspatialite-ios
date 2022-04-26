@@ -39,12 +39,11 @@ INCLUDEDIR = ${PREFIX}/include
 
 CXX = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 CC = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0 -O3 -fembed-bitcode
-CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=7.0 -O3 -fembed-bitcode
-LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=7.0
+CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=13.0 -O3 -fembed-bitcode
+CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=13.0 -O3 -fembed-bitcode
+LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=13.0
 
 arch: ${LIBDIR}/libspatialite.a
-	rm -rf ${WORKDIR}
 
 # Copy files to per-arch workdir so that we don't mess with source files unduly.
 ${WORKDIR}/%: ${SRCDIR}/%
@@ -59,13 +58,14 @@ ${LIBDIR}/libspatialite.a: \
 	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
-	CFLAGS="${CFLAGS} -DOMIT_ICONV=1 -Wno-error=implicit-function-declaration" \
-	CXXFLAGS="${CXXFLAGS} -DOMIT_ICONV=1 -Wno-error=implicit-function-declaration" \
+	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
+	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
 		./configure --host=${HOST} --enable-freexl=no --enable-rttopo=yes \
-	  --enable-libxml2=no --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
+	  --enable-libxml2=no --prefix=${PREFIX} --enable-static \
+		--with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
-${LIBDIR}/librttopo.a: ${WORKDIR}/rttopo
+${LIBDIR}/librttopo.a: ${WORKDIR}/rttopo ${LIBDIR}/libgeos.a ${LIBDIR}/libiconv.a
 	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -73,7 +73,8 @@ ${LIBDIR}/librttopo.a: ${WORKDIR}/rttopo
 	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
 	./configure --host=${HOST} --prefix=${PREFIX} \
-	    --disable-shared --with-geosconfig=${BINDIR}/geos-config && make clean install
+	    --disable-shared --enable-static \
+			--with-geosconfig=${BINDIR}/geos-config && make clean install
 
 
 ${LIBDIR}/libproj.a: ${WORKDIR}/proj
@@ -117,15 +118,13 @@ ${LIBDIR}/libminizip.a: ${WORKDIR}/minizip
 		./configure --host=${HOST} --enable-shared=no \
 		--enable-static=yes --prefix=${PREFIX} && make clean install-strip
 
-# ${LIBDIR}/libiconv.a: ${WORKDIR}/iconv
-# 	cd $^ && env \
-# 	CXX=${CXX} \
-# 	CC=${CC} \
-# 	CFLAGS="${CFLAGS}" \
-# 	CXXFLAGS="${CXXFLAGS}" \
-# 	LDFLAGS="${LDFLAGS}" \
-# 		./configure --host=${HOST} --enable-shared=no \
-# 		--enable-static=yes --prefix=${PREFIX} && make clean install-strip
+${LIBDIR}/libiconv.a: ${WORKDIR}/iconv
+	cd $^ && env \
+	CC=${CC} \
+	CFLAGS="${CFLAGS}" \
+	LDFLAGS="${LDFLAGS}" \
+		./configure --enable-shared=no \
+		--enable-static=yes --prefix=${PREFIX} && make clean install
 
 # SOURCE FILES
 
@@ -158,10 +157,9 @@ ${SRCDIR}/minizip:
 	mkdir -p $@
 	curl http://www.gaia-gis.it/gaia-sins/dataseltzer-sources/minizip-1.2.11.tar.gz | tar -xz -C $@ --strip-components=1
 
-# NOTE: this is disabled for now
-# ${SRCDIR}/iconv:
-# 	mkdir -p $@
-# 	curl http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz | tar -xz -C $@ --strip-components=1
+${SRCDIR}/iconv:
+	mkdir -p $@
+	curl http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz | tar -xz -C $@ --strip-components=1
 
 clean:
 	rm -rf build sources
