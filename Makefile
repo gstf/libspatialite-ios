@@ -62,7 +62,7 @@ ${LIBDIR}/libspatialite.a: \
 	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
 		./configure --host=${HOST} --enable-freexl=no --enable-rttopo=yes \
-	  --enable-libxml2=no --prefix=${PREFIX} --enable-static \
+	  --enable-libxml2=no --enable-iconv=yes --prefix=${PREFIX} --enable-static \
 		--with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
 ${LIBDIR}/librttopo.a: ${WORKDIR}/rttopo ${LIBDIR}/libgeos.a ${LIBDIR}/libiconv.a
@@ -124,7 +124,7 @@ ${LIBDIR}/libiconv.a: ${WORKDIR}/iconv
 	CFLAGS="${CFLAGS}" \
 	LDFLAGS="${LDFLAGS}" \
 		./configure --enable-shared=no \
-		--enable-static=yes --prefix=${PREFIX} && make clean install
+		--enable-static=yes --host=${HOST} --prefix=${PREFIX} && make clean install
 
 # SOURCE FILES
 
