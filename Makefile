@@ -40,8 +40,10 @@ INCLUDEDIR = ${PREFIX}/include
 CXX = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 CC = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
 CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=13.0 -O3 -fembed-bitcode
-CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=13.0 -O3 -fembed-bitcode
+CXXFLAGS = -stdlib=libc++ -std=c++17 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=13.0 -O3 -fembed-bitcode
 LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=13.0
+
+CONFIGURE = CXX=${CXX} CC=${CC} ./configure --host=${HOST} --prefix=${PREFIX} --enable-static --disable-shared 
 
 arch: ${LIBDIR}/libspatialite.a
 
@@ -56,34 +58,27 @@ ${LIBDIR}/libspatialite.a: \
 		${LIBDIR}/librttopo.a ${LIBDIR}/libsqlite3.a \
 		${LIBDIR}/libminizip.a ${LIBDIR}/libiconv.a
 	cd $^ && env \
-	CXX=${CXX} \
-	CC=${CC} \
 	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
 	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
-		./configure --host=${HOST} --enable-freexl=no --enable-rttopo=yes \
-	  --enable-libxml2=no --enable-iconv=yes --prefix=${PREFIX} --enable-static \
-		--with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
+		${CONFIGURE} \
+		--enable-freexl=no --enable-rttopo=yes --enable-libxml2=no --enable-iconv=yes \
+		--with-geosconfig=${BINDIR}/geos-config && make clean install-strip
 
 ${LIBDIR}/librttopo.a: ${WORKDIR}/rttopo ${LIBDIR}/libgeos.a ${LIBDIR}/libiconv.a
 	cd $^ && env \
-	CXX=${CXX} \
-	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
-	./configure --host=${HOST} --prefix=${PREFIX} \
-	    --disable-shared --enable-static \
-			--with-geosconfig=${BINDIR}/geos-config && make clean install
+	${CONFIGURE} --with-geosconfig=${BINDIR}/geos-config && make clean install
 
 
 ${LIBDIR}/libproj.a: ${WORKDIR}/proj
 	cd $^ && env \
-	CXX=${CXX} \
-	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
+	LDFLAGS="${LDFLAGS}" \
+	${CONFIGURE} && make clean install
 
 # We fall back to CMake because we are having trouble setting the sysroot in the configure
 # script. There isn't an apparent way to consume the `--disable-shared` flag in the configure
@@ -99,59 +94,53 @@ ${LIBDIR}/libgeos.a: ${WORKDIR}/geos
 	make clean install
 
 ${LIBDIR}/libsqlite3.a: ${WORKDIR}/sqlite3
-	cd $^ && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
-	CXX=${CXX} \
-	CC=${CC} \
+	cd $^ && env \
+	LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
 	CFLAGS="${CFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
 	CXXFLAGS="${CXXFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
 	LDFLAGS="-Wl,-arch -Wl,${ARCH} -arch_only ${ARCH} ${LDFLAGS}" \
-	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared \
-	   --enable-dynamic-extensions --enable-static && make clean install-includeHEADERS install-libLTLIBRARIES
+	${CONFIGURE} --enable-dynamic-extensions && make clean install-includeHEADERS install-libLTLIBRARIES
 
 ${LIBDIR}/libminizip.a: ${WORKDIR}/minizip
 	cd $^ && env \
-	CXX=${CXX} \
-	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS}" \
-		./configure --host=${HOST} --enable-shared=no \
-		--enable-static=yes --prefix=${PREFIX} && make clean install-strip
+	${CONFIGURE} && make clean install-strip
 
 ${LIBDIR}/libiconv.a: ${WORKDIR}/iconv
 	cd $^ && env \
-	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
+	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS}" \
-		./configure --enable-shared=no \
-		--enable-static=yes --host=${HOST} --prefix=${PREFIX} && make clean install
+	${CONFIGURE} && make clean install
 
 # SOURCE FILES
 
 ${SRCDIR}/proj:
 	mkdir -p $@
 	curl -L http://download.osgeo.org/proj/proj-4.9.3.tar.gz | tar -xz -C $@ --strip-components=1
-	./change-deployment-target $@
+# ./change-deployment-target $@
 
 ${SRCDIR}/geos:
 	mkdir -p $@
 	curl http://download.osgeo.org/geos/geos-3.10.2.tar.bz2 | tar -xz -C $@ --strip-components=1
-	./change-deployment-target $@
+# ./change-deployment-target $@
 
 ${SRCDIR}/spatialite:
 	mkdir -p $@
 	curl http://www.gaia-gis.it/gaia-sins/libspatialite-5.0.1.tar.gz | tar -xz -C $@ --strip-components=1
-	./change-deployment-target $@
+# ./change-deployment-target $@
 
 ${SRCDIR}/rttopo:
 	git clone https://git.osgeo.org/gogs/rttopo/librttopo.git $@
 	cd $@ && git checkout librttopo-1.1.0 && ./autogen.sh
-	./change-deployment-target $@
+# ./change-deployment-target $@
 
 ${SRCDIR}/sqlite3:
 	mkdir -p $@
 	curl https://www.sqlite.org/2022/sqlite-autoconf-3380100.tar.gz | tar -xz -C $@ --strip-components=1
-	./change-deployment-target $@
+#	./change-deployment-target $@
 
 ${SRCDIR}/minizip:
 	mkdir -p $@
