@@ -151,6 +151,7 @@ ${SRCDIR}/minizip:
 	mkdir -p $@
 	curl http://www.gaia-gis.it/gaia-sins/dataseltzer-sources/minizip-1.2.11.tar.gz | tar -xz -C $@ --strip-components=1
 
+# NOTE: this is disabled for now
 ${SRCDIR}/iconv:
 	mkdir -p $@
 	curl http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz | tar -xz -C $@ --strip-components=1
