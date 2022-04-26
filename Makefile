@@ -44,17 +44,21 @@ LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -
 
 arch: ${LIBDIR}/libspatialite.a
 
-${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/rttopo.a ${SRCDIR}/spatialite
+# For now, we omit iconv because we can't figure out how to get it to build
+${LIBDIR}/libspatialite.a: \
+		${SRCDIR}/spatialite ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a \
+		${LIBDIR}/librttopo.a ${LIBDIR}/libsqlite3.a \
+		${LIBDIR}/libminizip.a ${LIBDIR}/libiconv.a
 	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
-	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
-	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
+	CFLAGS="${CFLAGS} -DOMIT_ICONV=1 -Wno-error=implicit-function-declaration" \
+	CXXFLAGS="${CXXFLAGS} -DOMIT_ICONV=1 -Wno-error=implicit-function-declaration" \
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
 		./configure --host=${HOST} --enable-freexl=no --enable-rttopo=yes \
 	  --enable-libxml2=no --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
-${LIBDIR}/rttopo.a: ${SRCDIR}/rttopo
+${LIBDIR}/librttopo.a: ${SRCDIR}/rttopo
 	cd $^ && env \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -83,18 +87,38 @@ ${LIBDIR}/libgeos.a: ${SRCDIR}/geos
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
 	LDFLAGS="${LDFLAGS}" \
-	cmake -DCMAKE_OSX_SYSROOT:PATH="${IOS_SDK}" -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" . && \
+	cmake -DCMAKE_OSX_SYSROOT:PATH="${IOS_SDK}" -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" -DBUILD_SHARED_LIBS=OFF . && \
 	make clean install
 
 ${LIBDIR}/libsqlite3.a: ${SRCDIR}/sqlite3
 	cd $^ && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
 	CXX=${CXX} \
 	CC=${CC} \
-	CFLAGS="${CFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
-	CXXFLAGS="${CXXFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
+	CFLAGS="${CFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
+	CXXFLAGS="${CXXFLAGS} -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS3_PARENTHESIS=1" \
 	LDFLAGS="-Wl,-arch -Wl,${ARCH} -arch_only ${ARCH} ${LDFLAGS}" \
 	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared \
 	   --enable-dynamic-extensions --enable-static && make clean install-includeHEADERS install-libLTLIBRARIES
+
+${LIBDIR}/libminizip.a: ${SRCDIR}/minizip
+	cd $^ && env \
+	CXX=${CXX} \
+	CC=${CC} \
+	CFLAGS="${CFLAGS}" \
+	CXXFLAGS="${CXXFLAGS}" \
+	LDFLAGS="${LDFLAGS}" \
+		./configure --host=${HOST} --enable-shared=no \
+		--enable-static=yes --prefix=${PREFIX} && make clean install-strip
+
+${LIBDIR}/libiconv.a: ${SRCDIR}/iconv
+	cd $^ && env \
+	CXX=${CXX} \
+	CC=${CC} \
+	CFLAGS="${CFLAGS}" \
+	CXXFLAGS="${CXXFLAGS}" \
+	LDFLAGS="${LDFLAGS}" \
+		./configure --host=${HOST} --enable-shared=no \
+		--enable-static=yes --prefix=${PREFIX} && make clean install-strip
 
 # SOURCE FILES
 
@@ -112,7 +136,6 @@ ${SRCDIR}/spatialite:
 	mkdir -p $@
 	curl http://www.gaia-gis.it/gaia-sins/libspatialite-5.0.1.tar.gz | tar -xz -C $@ --strip-components=1
 	./change-deployment-target $@
-#	./update-spatialite
 
 ${SRCDIR}/rttopo:
 	git clone https://git.osgeo.org/gogs/rttopo/librttopo.git $@
@@ -123,6 +146,14 @@ ${SRCDIR}/sqlite3:
 	mkdir -p $@
 	curl https://www.sqlite.org/2022/sqlite-autoconf-3380100.tar.gz | tar -xz -C $@ --strip-components=1
 	./change-deployment-target $@
+
+${SRCDIR}/minizip:
+	mkdir -p $@
+	curl http://www.gaia-gis.it/gaia-sins/dataseltzer-sources/minizip-1.2.11.tar.gz | tar -xz -C $@ --strip-components=1
+
+${SRCDIR}/iconv:
+	mkdir -p $@
+	curl http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz | tar -xz -C $@ --strip-components=1
 
 clean:
 	rm -rf build sources
