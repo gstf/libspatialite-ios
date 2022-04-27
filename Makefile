@@ -56,20 +56,20 @@ ${WORKDIR}/%: ${SRCDIR}/%
 ${LIBDIR}/libspatialite.a: \
 		${WORKDIR}/spatialite ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a \
 		${LIBDIR}/librttopo.a ${LIBDIR}/libsqlite3.a \
-		${LIBDIR}/libminizip.a ${LIBDIR}/libiconv.a
+		${LIBDIR}/libminizip.a
 	cd $^ && env \
 	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
 	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
-	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
+	LDFLAGS="${LDFLAGS} -lgeos -lgeos_c -lc++" \
 		${CONFIGURE} \
-		--enable-freexl=no --enable-rttopo=yes --enable-libxml2=no --enable-iconv=yes \
+		--enable-freexl=no --enable-rttopo=yes --enable-libxml2=no --enable-iconv=no \
 		--with-geosconfig=${BINDIR}/geos-config && make clean install-strip
 
-${LIBDIR}/librttopo.a: ${WORKDIR}/rttopo ${LIBDIR}/libgeos.a ${LIBDIR}/libiconv.a
+${LIBDIR}/librttopo.a: ${WORKDIR}/rttopo ${LIBDIR}/libgeos.a
 	cd $^ && env \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" \
+	LDFLAGS="${LDFLAGS} -lgeos -lgeos_c -lc++" \
 	${CONFIGURE} --with-geosconfig=${BINDIR}/geos-config && make clean install
 
 
