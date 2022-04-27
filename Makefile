@@ -52,11 +52,17 @@ ${WORKDIR}/%: ${SRCDIR}/%
 	mkdir -p ${WORKDIR}
 	cp -R $^ $@
 
+${WORKDIR}/spatialite: ${SRCDIR}/spatialite
+	mkdir -p ${WORKDIR}
+	cp -R $^ $@
+	cp -R ${CURDIR}/patches $@
+	cd $@ && ${CURDIR}/update-spatialite
+
 # For now, we omit iconv because we can't figure out how to get it to build
+# We also don't include sqlite3 because we can dynamically load spatialite from the system library
 ${LIBDIR}/libspatialite.a: \
 		${WORKDIR}/spatialite ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a \
-		${LIBDIR}/librttopo.a ${LIBDIR}/libsqlite3.a \
-		${LIBDIR}/libminizip.a
+		${LIBDIR}/librttopo.a ${LIBDIR}/libminizip.a
 	cd $^ && env \
 	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
 	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
