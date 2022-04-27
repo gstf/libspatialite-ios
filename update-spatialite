@@ -6,6 +6,7 @@ patch -Np0 < patches/gg_formats.h.patch
 patch -Np0 < patches/gg_structs.h.patch
 patch -Np0 < patches/sqlite.h.patch
 
-for f in $(find . -name Makefile.*); do
+for f in $(find . -name "Makefile.*"); do
+  echo "Patching $f"
   sed -i 's/ \-DLOADABLE_EXTENSION//g' $f
 done

@@ -62,7 +62,7 @@ ${WORKDIR}/spatialite: ${SRCDIR}/spatialite
 # We also don't include sqlite3 because we can dynamically load spatialite from the system library
 ${LIBDIR}/libspatialite.a: \
 		${WORKDIR}/spatialite ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a \
-		${LIBDIR}/librttopo.a ${LIBDIR}/libminizip.a
+		${LIBDIR}/librttopo.a ${LIBDIR}/libminizip.a ${LIBDIR}/libsqlite3.a
 	cd $^ && env \
 	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
 	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
