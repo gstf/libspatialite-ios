@@ -19,11 +19,6 @@
 # Downloaded and built directories
 build
 include
-geos
-proj
-spatialite
-sqlite3
-rttopo
 
-_old
+# Source files
 sources

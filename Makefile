@@ -1,11 +1,21 @@
 XCODE_DEVELOPER = $(shell xcode-select --print-path)
 IOS_PLATFORM ?= iPhoneOS
 
+# Milestone sets the directory within /artifacts that the files will be copied
+# to on successful build.
+MILESTONE = v2
+
 # Pick latest SDK in the directory
 IOS_PLATFORM_DEVELOPER = ${XCODE_DEVELOPER}/Platforms/${IOS_PLATFORM}.platform/Developer
 IOS_SDK = ${IOS_PLATFORM_DEVELOPER}/SDKs/$(shell ls ${IOS_PLATFORM_DEVELOPER}/SDKs | sort -r | head -n1)
 
-all: build/lib/libspatialite.a
+all: artifacts/${MILESTONE}/lib/libspatialite.a
+
+artifacts/${MILESTONE}/lib/libspatialite.a: build/lib/libspatialite.a
+	mkdir -p artifacts/${MILESTONE}
+	cp -R build/lib artifacts/${MILESTONE}/lib
+	cp -R build/include artifacts/${MILESTONE}/include
+
 build/lib/libspatialite.a: build_arches
 	mkdir -p build/lib
 	mkdir -p build/include
