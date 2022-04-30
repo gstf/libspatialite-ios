@@ -1,4 +1,4 @@
---- spatialite/src/Headers/spatialite/sqlite.h	2016-04-09 11:13:12.000000000 +0100
+--- src/Headers/spatialite/sqlite.h	2016-04-09 11:13:12.000000000 +0100
 +++ ./sqlite.h	2016-04-09 11:16:30.000000000 +0100
 @@ -46,21 +46,9 @@
  #ifndef _SPATIALITE_SQLITE_H
