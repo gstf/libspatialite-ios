@@ -12,8 +12,8 @@ IOS_SDK = ${IOS_PLATFORM_DEVELOPER}/SDKs/$(shell ls ${IOS_PLATFORM_DEVELOPER}/SD
 all: artifacts/${MILESTONE}/lib/libspatialite.a
 
 artifacts/${MILESTONE}/lib/libspatialite.a: build/lib/libspatialite.a
-	mkdir -p artifacts/${MILESTONE}
-	cp -R build/lib artifacts/${MILESTONE}/lib
+	mkdir -p artifacts/${MILESTONE}/lib
+	cp -R build/lib/* artifacts/${MILESTONE}/lib
 	cp -R build/include artifacts/${MILESTONE}/include
 
 build/lib/libspatialite.a: build_arches
@@ -53,7 +53,7 @@ CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDE
 CXXFLAGS = -stdlib=libc++ -std=c++17 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=13.0 -O3 -fembed-bitcode
 LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=13.0
 
-CONFIGURE = CXX=${CXX} CC=${CC} ./configure --host=${HOST} --prefix=${PREFIX} --enable-static --disable-shared 
+CONFIGURE = CXX=${CXX} CC=${CC} ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared 
 
 arch: ${LIBDIR}/libspatialite.a
 
@@ -72,7 +72,7 @@ ${WORKDIR}/spatialite: ${SRCDIR}/spatialite
 # We also don't include sqlite3 because we can dynamically load spatialite from the system library
 ${LIBDIR}/libspatialite.a: \
 		${WORKDIR}/spatialite ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a \
-		${LIBDIR}/librttopo.a ${LIBDIR}/libminizip.a ${LIBDIR}/libsqlite3.a
+		${LIBDIR}/librttopo.a ${LIBDIR}/libminizip.a
 	cd $^ && env \
 	CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration" \
 	CXXFLAGS="${CXXFLAGS} -Wno-error=implicit-function-declaration" \
